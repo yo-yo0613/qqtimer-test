@@ -321,19 +321,33 @@
                 event.target.closest("select") ||
                 event.target.isContentEditable
             ) return;
+            // 多指觸控不計時
+            if (event.touches.length > 1) return;
+            touchMoved = false;
             if (!isRunning && !waitingRelease) {
                 waitingRelease = true;
                 // 可加預備動畫
             }
         });
 
+        let touchMoved = false;
+
+        document.body.addEventListener("touchmove", (event) => {
+            touchMoved = true;
+        });
+
         document.body.addEventListener("touchend", (event) => {
-            // 如果觸發點是按鈕或 select，不做事
+            // 如果觸發點是按鈕或 select，不做事 
             if (
                 event.target.closest("button") ||
                 event.target.closest("select") ||
                 event.target.isContentEditable
             ) return;
+            // 多指觸控或滑動不計時
+            if (event.touches.length > 0 || touchMoved) {
+                waitingRelease = false;
+                return;
+            }
             if (isRunning) {
                 clearInterval(timerInterval);
                 timerInterval = null;
