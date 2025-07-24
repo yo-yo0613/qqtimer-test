@@ -102,21 +102,6 @@
             top: 0;
             z-index: 1;
         }
-
-        @media (max-width: 600px) {
-    .side-panel {
-        display: none;
-    }
-    #timer {
-        margin: 60px auto;
-        font-size: 4em;
-        max-width: 90vw;
-    }
-    #scramble {
-        font-size: 1.2em;
-        padding: 0 8px;
-    }
-}
     </style>
 </head>
 <body>
@@ -365,57 +350,6 @@
                 return;
             }
             touchMoved = false; // 重設
-            if (isRunning) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                const finalTime = (Date.now() - startTime) / 1000;
-                const scramble = document.getElementById("scramble").textContent;
-                getTimeList().push({ time: finalTime, penalty: "", scramble });
-                updateRecords();
-                setTimeout(() => {
-                    timerEl.textContent = "0.00";
-                    generateScramble();
-                }, 400);
-                isRunning = false;
-            } else if (waitingRelease) {
-                if (timerInterval) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                }
-                timerEl.textContent = "0.00";
-                startTime = Date.now();
-                timerInterval = setInterval(() => {
-                    const t = (Date.now() - startTime) / 1000;
-                    timerEl.textContent = t.toFixed(2);
-                }, 10);
-                isRunning = true;
-            }
-            waitingRelease = false;
-        });
-
-        const timerArea = document.getElementById("timer");
-        
-
-        timerArea.addEventListener("touchstart", (event) => {
-            if (event.touches.length > 1) return;
-            touchMoved = false;
-            if (!isRunning && !waitingRelease) {
-                waitingRelease = true;
-                // 可加預備動畫
-            }
-        });
-
-        timerArea.addEventListener("touchmove", (event) => {
-            touchMoved = true;
-        });
-
-        timerArea.addEventListener("touchend", (event) => {
-            if (touchMoved) {
-                waitingRelease = false;
-                touchMoved = false;
-                return;
-            }
-            touchMoved = false;
             if (isRunning) {
                 clearInterval(timerInterval);
                 timerInterval = null;
