@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>qqTimer Test</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --primary-color: #007aff;
+            --red-color: #ff3b30;
+            --green-color: #34c759;
+            --panel-bg-color: #ffffff;
+            --panel-border-color: #e0e0e0;
+            --item-bg-color: #f8f8f8;
+            --item-hover-bg-color: #e8e8e8;
+            --button-bg-color: #e9e9eb;
+            --button-text-color: #333;
+        }
+
+        body.dark-mode {
+            --bg-color: #1c1c1e;
+            --text-color: #f2f2f7;
+            --primary-color: #0a84ff;
+            --red-color: #ff453a;
+            --green-color: #30d158;
+            --panel-bg-color: #2c2c2e;
+            --panel-border-color: #3a3a3c;
+            --item-bg-color: #3a3a3c;
+            --item-hover-bg-color: #4a4a4c;
+            --button-bg-color: #3a3a3c;
+            --button-text-color: #f2f2f7;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+    
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .puzzle-selector {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #scramble {
+            font-size: 1.5em;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #timer {
+            font-size: 5em; /* 原本是3em，改大 */
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        #instructions {
+            font-size: 1.2em;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        .side-panel {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            overflow-y: auto;
+        }
+
+        #times-list {
+            max-height: 300px;   /* 你可以依需求調整高度 */
+            overflow-y: auto;
+            padding-right: 20px;  /* 避免滾動條壓住內容 */
+        }
+        .stats {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 12px;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1em;
+        }
+        .stats-table th, .stats-table td {
+            border: 1px solid var(--panel-border-color);
+            padding: 4px 8px;
+            text-align: center;
+        }
+        .stats-table th {
+            background: var(--item-bg-color);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>QQTimer Test</h1>
+    <div class="puzzle-selector">
+        <select id="puzzle-select">
+            <option value="333" selected>3x3x3</option>
+            <option value="222">2x2x2</option>
+            <option value="444">4x4x4</option>
+            <option value="555">5x5x5</option>
+            <option value="pyram">Pyraminx</option>
+            <option value="skewb">Skewb</option>
+            <option value="minx">Megaminx</option>
+            <option value="sq1">Square-1</option>
+        </select>
+        <button id="theme-toggle" class="theme-button">切換模式</button>
+        <button id="blindfolded" class="theme-button">盲擰</button>
+    </div>
+    <div id="scramble">Scramble will be displayed here.</div>
+    <div id="timer" class="timer-display">0.000</div>
+    <div id="instructions" class="instructions">按住空白鍵準備</div>
+
+    <div class="side-panel">
+        <div class="session">
+            <h3>本次成績</h3>
+            <div id="session-bar" style="margin-bottom:10px;">
+                <select id="session-select"></select>
+                <input id="session-name" type="text" placeholder="新階段名稱" style="width:100px;">
+                <button id="new-session">新建階段</button>
+                <button id="delete-session">刪除階段</button>
+            </div>
+            <ul id="times-list"></ul>
+            <pre id="records"></pre>
+            <button id="clear-times" style="margin-top:10px;">清除成績</button>
+        </div>
+        <div class="stats">
+            <h3>統計數據</h3>
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>現在</th>
+                        <th>最快</th>
+                        <th>最慢</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>單次</td>
+                        <td id="current-single">N/A</td>
+                        <td id="best-single">N/A</td>
+                        <td id="worst-single">N/A</td>
+                    </tr>
+                    <tr>
+                        <td>Ao5</td>
+                        <td id="ao5">N/A</td>
+                        <td id="best-ao5">N/A</td>
+                        <td id="worst-ao5">N/A</td>
+                    </tr>
+                    <tr>
+                        <td>Ao12</td>
+                        <td id="ao12">N/A</td>
+                        <td id="best-ao12">N/A</td>
+                        <td id="worst-ao12">N/A</td>
+                    </tr>
+                    <tr>
+                        <td>Ao25</td>
+                        <td id="ao25">N/A</td>
+                        <td id="best-ao25">N/A</td>
+                        <td id="worst-ao25">N/A</td>
+                    </tr>
+                    <tr>
+                        <td>Ao50</td>
+                        <td id="ao50">N/A</td>
+                        <td id="best-ao50">N/A</td>
+                        <td id="worst-ao50">N/A</td>
+                    </tr>
+                    <tr>
+                        <td>Ao100</td>
+                        <td id="ao100">N/A</td>
+                        <td id="best-ao100">N/A</td>
+                        <td id="worst-ao100">N/A</td>
+                    </tr>
+                    <tr>
+                        <td>Ao200</td>
+                        <td id="ao200">N/A</td>
+                        <td id="best-ao200">N/A</td>
+                        <td id="worst-ao200">N/A</td>
+                    </tr>
+                    <tr>
+                        <td>Ao1000</td>
+                        <td id="ao1000">N/A</td>
+                        <td id="best-ao1000">N/A</td>
+                        <td id="worst-ao1000">N/A</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Count: <span id="solve-count">0</span></p>
+        </div>
+    </div>
+
+    
+
+    <audio id="start-sound" src="https://freesound.org/data/previews/522/522143_10625874-lq.mp3"></audio>
+    <audio id="stop-sound" src="https://freesound.org/data/previews/331/331912_3248244-lq.mp3"></audio>
+    
+    <script type="module">
+        import { randomScrambleForEvent } from "https://cdn.cubing.net/v0/js/cubing/scramble";
+
+        const timerEl = document.getElementById("timer");
+
+        const startSound = document.getElementById("start-sound");
+        const stopSound = document.getElementById("stop-sound");
+        const blindfoldedBtn = document.getElementById("blindfolded");
+        blindfoldedBtn.onclick = () => {
+            window.location.href = 'blindfolded.html';
+        };
+
+        let isRunning = false;
+        let waitingRelease = false;
+        let startTime = 0;
+        let timerInterval = null;
+
+        // Session 資料結構
+        let sessions = [
+            { name: "階段1", times: [] }
+        ];
+        let currentSession = 0;
+
+        // Session Bar 初始化與事件
+        function updateSessionBar() {
+            const select = document.getElementById("session-select");
+            select.innerHTML = "";
+            sessions.forEach((s, i) => {
+                const opt = document.createElement("option");
+                opt.value = i;
+                opt.textContent = s.name;
+                select.appendChild(opt);
+            });
+            select.value = currentSession;
+        }
+        document.getElementById("new-session").onclick = () => {
+            let name = document.getElementById("session-name").value.trim();
+            if (!name) name = "階段" + (sessions.length + 1);
+            sessions.push({ name, times: [] });
+            currentSession = sessions.length - 1;
+            updateSessionBar();
+            updateRecords();
+            document.getElementById("session-name").value = "";
+        };
+        document.getElementById("delete-session").onclick = () => {
+            if (sessions.length === 1) return alert("至少要有一個階段！");
+            if (!confirm("確定要刪除這個階段嗎？")) return;
+            sessions.splice(currentSession, 1);
+            currentSession = 0;
+            updateSessionBar();
+            updateRecords();
+        };
+        document.getElementById("session-select").onchange = (e) => {
+            currentSession = Number(e.target.value);
+            updateRecords();
+        };
+
+        document.getElementById("puzzle-select").addEventListener("change", async (event) => {
+            const puzzle = event.target.value;
+            const newScramble = await randomScrambleForEvent(puzzle);
+            document.getElementById("scramble").textContent = newScramble;
+        });
+
+        document.getElementById("puzzle-select").dispatchEvent(new Event("change"));
+
+        document.body.addEventListener("keydown", (event) => {
+            if (event.code === "Space" && !isRunning && !waitingRelease) {
+                waitingRelease = true;
+                // 可加上預備動畫或顏色
+            }
+        });
+
+        document.body.addEventListener("keyup", (event) => {
+            if (event.code === "Space") {
+                if (isRunning) {
+                    // 計時結束，記錄成績
+                    clearInterval(timerInterval);
+                    timerInterval = null; // <--- 這行很重要
+                    const finalTime = (Date.now() - startTime) / 1000;
+                    const scramble = document.getElementById("scramble").textContent;
+                    getTimeList().push({ time: finalTime, penalty: "", scramble });
+                    updateRecords();
+                    setTimeout(() => {
+                        timerEl.textContent = "0.00";
+                        generateScramble();
+                    }, 400);
+                    isRunning = false;
+                } else if (waitingRelease) {
+                    // 開始計時前先清除舊的 interval
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
+                    timerEl.textContent = "0.00"; // 顯示歸零
+                    startTime = Date.now();
+                    timerInterval = setInterval(() => {
+                        const t = (Date.now() - startTime) / 1000;
+                        timerEl.textContent = t.toFixed(2);
+                    }, 10);
+                    isRunning = true;
+                }
+                waitingRelease = false;
+            }
+        });
+
+        document.body.addEventListener("touchstart", (event) => {
+            if (!isRunning && !waitingRelease) {
+                waitingRelease = true;
+                // 可加預備動畫
+            }
+        });
+
+        document.body.addEventListener("touchend", (event) => {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                const finalTime = (Date.now() - startTime) / 1000;
+                const scramble = document.getElementById("scramble").textContent;
+                getTimeList().push({ time: finalTime, penalty: "", scramble });
+                updateRecords();
+                setTimeout(() => {
+                    timerEl.textContent = "0.00";
+                    generateScramble();
+                }, 400);
+                isRunning = false;
+            } else if (waitingRelease) {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                timerEl.textContent = "0.00";
+                startTime = Date.now();
+                timerInterval = setInterval(() => {
+                    const t = (Date.now() - startTime) / 1000;
+                    timerEl.textContent = t.toFixed(2);
+                }, 10);
+                isRunning = true;
+            }
+            waitingRelease = false;
+        });
+
+        document.getElementById("theme-toggle").addEventListener("click", () => {
+            document.body.classList.toggle("dark-mode");
+        });
+
+        // Initialize the theme based on user preference
+        const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+        if (prefersDarkScheme.matches) {
+            document.body.classList.add("dark-mode");
+        }
+
+        prefersDarkScheme.addEventListener("change", (e) => {
+            if (e.matches) {
+                document.body.classList.add("dark-mode");
+            } else {
+                document.body.classList.remove("dark-mode");
+            }
+        });
+
+        // Load initial scramble
+        (async () => {
+            const initialPuzzle = document.getElementById("puzzle-select").value;
+            const initialScramble = await randomScrambleForEvent(initialPuzzle);
+            document.getElementById("scramble").textContent = initialScramble;
+        })();
+
+        // Save and load data from localStorage
+        function saveData() {
+            localStorage.setItem("qq_sessions", JSON.stringify(sessions));
+            localStorage.setItem("qq_currentSession", currentSession);
+        }
+        function loadData() {
+            const savedSessions = localStorage.getItem("qq_sessions");
+            const savedCurrent = localStorage.getItem("qq_currentSession");
+            if (savedSessions) sessions = JSON.parse(savedSessions);
+            if (savedCurrent) currentSession = Number(savedCurrent);
+            updateSessionBar();
+            updateRecords();
+        }
+        window.addEventListener("beforeunload", saveData);
+        window.addEventListener("load", loadData);
+  
+
+        function calculateAverage(times, n) {
+            if (times.length < n) return "-";
+            // 只取最後 n 筆，並轉換成數值（含懲罰）
+            const recent = times.slice(-n).map(entry => {
+                if (entry.penalty === "DNF") return Infinity;
+                if (entry.penalty === "+2") return entry.time + 2;
+                return entry.time;
+            });
+            // 若 DNF 超過1個，平均為DNF
+            if (recent.filter(t => t === Infinity).length > 1) return "DNF";
+            // 排序，去掉最大最小
+            const sorted = [...recent].sort((a, b) => a - b);
+            sorted.shift();
+            sorted.pop();
+            // 若剩下有 DNF，平均為 DNF
+            if (sorted.some(t => t === Infinity)) return "DNF";
+            const avg = sorted.reduce((a, b) => a + b, 0) / sorted.length;
+            return avg.toFixed(2);
+        }
+
+        function getAllAverages(n) {
+            const timeList = getTimeList(); // 修正：每次都取得最新的 timeList
+            let avgs = [];
+            for (let i = 0; i <= timeList.length - n; i++) {
+                const avg = calculateAverage(timeList.slice(i, i + n), n);
+                if (avg !== "DNF" && avg !== "-") avgs.push(Number(avg));
+            }
+            return avgs;
+        }
+
+        function updateStatsRow(current, best, worst, prefix) {
+            document.getElementById(prefix).textContent = current;
+            document.getElementById("best-" + prefix).textContent = best;
+            document.getElementById("worst-" + prefix).textContent = worst;
+        }
+
+        function getTimeList() {
+            return sessions[currentSession].times;
+        }
+
+        function updateRecords() {
+            const timeList = getTimeList();
+            const timesListEl = document.getElementById("times-list");
+            timesListEl.innerHTML = "";
+            timeList.forEach((entry, i) => {
+                const li = document.createElement("li");
+                let display = `${i + 1}. ${entry.time.toFixed(2)} sec`;
+                if (entry.penalty === "+2") display += " (+2)";
+                if (entry.penalty === "DNF") display += " (DNF)";
+                li.textContent = display;
+
+                // Scramble 顯示
+                const scrambleSpan = document.createElement("span");
+                scrambleSpan.style.display = "block";
+                scrambleSpan.style.fontSize = "0.9em";
+                scrambleSpan.style.color = "#888";
+                scrambleSpan.textContent = entry.scramble || "";
+                li.appendChild(scrambleSpan);
+
+                // Return 按鈕
+                const returnBtn = document.createElement("button");
+                returnBtn.textContent = "Return";
+                returnBtn.style.marginLeft = "8px";
+                returnBtn.onclick = () => {
+                    document.getElementById("scramble").textContent = entry.scramble;
+                };
+                li.appendChild(returnBtn);
+
+                // +2 按鈕
+                const plus2Btn = document.createElement("button");
+                plus2Btn.textContent = "+2";
+                plus2Btn.style.marginLeft = "8px";
+                plus2Btn.onclick = () => {
+                    entry.penalty = entry.penalty === "+2" ? "" : "+2";
+                    updateRecords();
+                };
+                li.appendChild(plus2Btn);
+
+                // DNF 按鈕
+                const dnfBtn = document.createElement("button");
+                dnfBtn.textContent = "DNF";
+                dnfBtn.style.marginLeft = "4px";
+                dnfBtn.onclick = () => {
+                    entry.penalty = entry.penalty === "DNF" ? "" : "DNF";
+                    updateRecords();
+                };
+                li.appendChild(dnfBtn);
+
+                // 沒事 按鈕
+                const nothingBtn = document.createElement("button");
+                nothingBtn.textContent = "沒事";
+                nothingBtn.style.marginLeft = "4px";
+                nothingBtn.onclick = () => {
+                    // 什麼都不做
+                };
+                li.appendChild(nothingBtn);
+
+                // 刪除 按鈕
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "刪除";
+                deleteBtn.style.marginLeft = "4px";
+                deleteBtn.onclick = () => {
+                    timeList.splice(i, 1);
+                    updateRecords();
+                };
+                li.appendChild(deleteBtn);
+
+                timesListEl.appendChild(li);
+            });
+            // AO計算
+            const aoList = [5, 12, 25, 50, 100, 200, 1000];
+            aoList.forEach(n => {
+                const ao = calculateAverage(timeList, n);
+                const allAvgs = getAllAverages(n);
+                const best = allAvgs.length ? Math.min(...allAvgs).toFixed(2) : "N/A";
+                const worst = allAvgs.length ? Math.max(...allAvgs).toFixed(2) : "N/A";
+                document.getElementById("ao" + n).textContent = ao;
+                document.getElementById("best-ao" + n).textContent = best;
+                document.getElementById("worst-ao" + n).textContent = worst;
+            });
+
+            // 單次最快/最慢
+            const validSingles = timeList.filter(e => e.penalty !== "DNF").map(e => (e.penalty === "+2" ? e.time + 2 : e.time));
+            const currentSingle = validSingles.length ? validSingles[validSingles.length - 1].toFixed(2) : "N/A";
+            const bestSingle = validSingles.length ? Math.min(...validSingles).toFixed(2) : "N/A";
+            const worstSingle = validSingles.length ? Math.max(...validSingles).toFixed(2) : "N/A";
+            document.getElementById("current-single").textContent = currentSingle;
+            document.getElementById("best-single").textContent = bestSingle;
+            document.getElementById("worst-single").textContent = worstSingle;
+
+            document.getElementById("solve-count").textContent = timeList.length;
+            saveData();
+        }
+
+        const recordsEl = document.getElementById("records");
+
+        document.getElementById("clear-times").addEventListener("click", () => {
+            if (confirm("確定要清除所有成績嗎？")) {
+                getTimeList().length = 0; // 直接清空目前階段的 times
+                updateRecords();
+            }
+        });
+
+        async function generateScramble() {
+            const puzzle = document.getElementById("puzzle-select").value;
+            const newScramble = await randomScrambleForEvent(puzzle);
+            document.getElementById("scramble").textContent = newScramble;
+        }
+    </script>
+</body>
+</html>

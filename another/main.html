@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QQTimer Plus</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #121212;
+      --text: white;
+    }
+
+    body.light {
+      --bg: #f4f4f4;
+      --text: #222;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      text-align: center;
+    }
+
+    #scramble {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+
+    #timer {
+      font-size: 6em;
+      margin: 20px 0;
+    }
+
+    #hint, #ao {
+      color: #888;
+      font-size: 1em;
+    }
+
+    #controls {
+      margin: 20px 0;
+    }
+
+    select, button {
+      margin: 5px;
+      padding: 6px 10px;
+      font-size: 1em;
+    }
+
+    #records {
+      white-space: pre-wrap;
+      text-align: left;
+      max-width: 90%;
+      margin: 0 auto;
+      font-size: 1em;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      #timer {
+        font-size: 3.5em;
+      }
+      #scramble {
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="scramble">Loading...</div>
+  <div id="timer">0.00</div>
+  <div id="hint">Press and release [Space] to start</div>
+
+  <div id="controls">
+    <select id="cubeType">
+      <option>2x2</option>
+      <option selected>3x3</option>
+      <option>4x4</option>
+      <option>5x5</option>
+      <option>6x6</option>
+      <option>7x7</option>
+    </select>
+    <button id="clear">Clear Records</button>
+    <button id="theme-toggle">Toggle Theme</button>
+  </div>
+
+  <div id="records"></div>
+
+  <audio id="start-sound" src="https://freesound.org/data/previews/522/522143_10625874-lq.mp3"></audio>
+  <audio id="stop-sound" src="https://freesound.org/data/previews/331/331912_3248244-lq.mp3"></audio>
+
+  <script>
+    const scrambleEl = document.getElementById("scramble");
+    const timerEl = document.getElementById("timer");
+    const recordsEl = document.getElementById("records");
+    const clearBtn = document.getElementById("clear");
+    const themeBtn = document.getElementById("theme-toggle");
+    const cubeTypeEl = document.getElementById("cubeType");
+    const startSound = document.getElementById("start-sound");
+    const stopSound = document.getElementById("stop-sound");
+
+    let isRunning = false;
+    let waitingRelease = false;
+    let startTime = 0;
+    let timerInterval = null;
+    let timeList = [];
+
+    const scrambleLengthMap = {
+      "2x2": 9, "3x3": 20, "4x4": 40,
+      "5x5": 60, "6x6": 80, "7x7": 100
+    };
+
+    // LocalStorage helpers
+    function saveData() {
+      localStorage.setItem("qq_times", JSON.stringify(timeList));
+      localStorage.setItem("qq_cube", cubeTypeEl.value);
+      localStorage.setItem("qq_theme", document.body.classList.contains("light") ? "light" : "dark");
+    }
+
+    function loadData() {
+      const saved = localStorage.getItem("qq_times");
+      if (saved) timeList = JSON.parse(saved);
+      const type = localStorage.getItem("qq_cube");
+      if (type) cubeTypeEl.value = type;
+      const theme = localStorage.getItem("qq_theme");
+      if (theme === "light") document.body.classList.add("light");
+    }
+
+    // 打亂產生器
+    function generateScramble() {
+      const moves = ["R", "L", "U", "D", "F", "B"];
+      const suffixes = ["", "'", "2"];
+      let scramble = [];
+      let last = "";
+      const len = scrambleLengthMap[cubeTypeEl.value] || 20;
+
+      for (let i = 0; i < len; i++) {
+        let move;
+        do {
+          move = moves[Math.floor(Math.random() * moves.length)];
+        } while (move === last);
+        last = move;
+        scramble.push(move + suffixes[Math.floor(Math.random() * suffixes.length)]);
+      }
+
+      scrambleEl.textContent = scramble.join(" ");
+    }
+
+    function calculateAverage(times, n) {
+      if (times.length < n) return "-";
+      const recent = [...times.slice(-n)].sort((a, b) => a - b);
+      recent.shift();
+      recent.pop();
+      const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
+      return avg.toFixed(2);
+    }
+
+    function updateRecords() {
+      let txt = timeList.map((t, i) => `${i + 1}. ${t.toFixed(2)} sec`).join('\n');
+      txt += `\n\nAO5: ${calculateAverage(timeList, 5)}  AO12: ${calculateAverage(timeList, 12)}`;
+      recordsEl.textContent = txt;
+      saveData();
+    }
+
+    // 按空白鍵「放開」才開始計時
+    document.body.addEventListener("keydown", e => {
+      if (e.code === "Space" && !isRunning) {
+        waitingRelease = true;
+      }
+    });
+
+    document.body.addEventListener("keyup", e => {
+      if (e.code === "Space") {
+        if (isRunning) {
+          clearInterval(timerInterval);
+          stopSound.play();
+          const finalTime = (Date.now() - startTime) / 1000;
+          timeList.push(finalTime);
+          updateRecords();
+          setTimeout(() => {
+            timerEl.textContent = "0.00";
+            generateScramble();
+          }, 400);
+        } else if (waitingRelease) {
+          startTime = Date.now();
+          startSound.play();
+          timerInterval = setInterval(() => {
+            const t = (Date.now() - startTime) / 1000;
+            timerEl.textContent = t.toFixed(2);
+          }, 10);
+        }
+        isRunning = !isRunning;
+        waitingRelease = false;
+      }
+    });
+
+    // 初始與按鈕行為
+    clearBtn.onclick = () => {
+      timeList = [];
+      updateRecords();
+    };
+
+    themeBtn.onclick = () => {
+      document.body.classList.toggle("light");
+      saveData();
+    };
+
+    cubeTypeEl.onchange = () => {
+      generateScramble();
+      saveData();
+    };
+
+    // 初始化
+    loadData();
+    generateScramble();
+    updateRecords();
+  </script>
+</body>
+</html>
