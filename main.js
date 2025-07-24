@@ -83,7 +83,7 @@ document.addEventListener('keydown', function(event) {
 });
 
 document.getElementById('speed-button').onclick = function() {
-    window.location.href = 'test.html';
+    window.location.href = 'index.html';
 };
 
 let darkmode = localStorage.getItem('darkmode');
