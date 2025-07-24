@@ -102,6 +102,21 @@
             top: 0;
             z-index: 1;
         }
+
+        @media (max-width: 600px) {
+    .side-panel {
+        display: none;
+    }
+    #timer {
+        margin: 60px auto;
+        font-size: 4em;
+        max-width: 90vw;
+    }
+    #scramble {
+        font-size: 1.2em;
+        padding: 0 8px;
+    }
+}
     </style>
 </head>
 <body>
@@ -330,26 +345,28 @@
             }
         });
 
+        const timerArea = document.getElementById("timer");
         let touchMoved = false;
 
-        document.body.addEventListener("touchmove", (event) => {
+        timerArea.addEventListener("touchstart", (event) => {
+            if (event.touches.length > 1) return;
+            touchMoved = false;
+            if (!isRunning && !waitingRelease) {
+                waitingRelease = true;
+            }
+        });
+
+        timerArea.addEventListener("touchmove", (event) => {
             touchMoved = true;
         });
 
-        document.body.addEventListener("touchend", (event) => {
-            // 如果觸發點是按鈕或 select，不做事 
-            if (
-                event.target.closest("button") ||
-                event.target.closest("select") ||
-                event.target.isContentEditable
-            ) return;
-            // 如果有滑動就不計時
+        timerArea.addEventListener("touchend", (event) => {
             if (touchMoved) {
                 waitingRelease = false;
-                touchMoved = false; // 重設
+                touchMoved = false;
                 return;
             }
-            touchMoved = false; // 重設
+            touchMoved = false;
             if (isRunning) {
                 clearInterval(timerInterval);
                 timerInterval = null;
