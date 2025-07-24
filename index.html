@@ -343,11 +343,13 @@
                 event.target.closest("select") ||
                 event.target.isContentEditable
             ) return;
-            // 多指觸控或滑動不計時
-            if (event.touches.length > 0 || touchMoved) {
+            // 如果有滑動就不計時
+            if (touchMoved) {
                 waitingRelease = false;
+                touchMoved = false; // 重設
                 return;
             }
+            touchMoved = false; // 重設
             if (isRunning) {
                 clearInterval(timerInterval);
                 timerInterval = null;
