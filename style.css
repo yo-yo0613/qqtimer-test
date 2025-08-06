@@ -32,141 +32,158 @@ body {
     color: #000;
 }
 
-#letter-pair-text {
-    font-size: 200px;
-}
-
-#letter-pair-text, #Algorithm {
-    margin: 20px;
-    text-align: center;
-}
-
-#Algorithm {
-    font-size: 100px;
-    color: #555;
-}
-
-#display {
-    text-align: center;
-    margin-top: 50px;
-}
-
-#speed-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#theme-switch {
-    height: 50px;
-    width: 50px;
-    padding: 0;
-    border-radius: 50%;
-    background-color: var(--base-variant);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-}
-
-#theme-switch svg {
-    fill: var(--primary-color);
-}
-
-#theme-switch svg:last-child {
-    display: none;
-}
-
-.darkmode #theme-switch svg:first-child {
-    display: none;
-}
-
-.darkmode #theme-switch svg:last-child {
-    display: block;
-}
-
-#show-letter-btn {
-    padding: 16px 40px;
-    font-size: 28px;
-    background-color: var(--accent-color);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-    cursor: pointer;
-    margin: 30px 0;
-    transition: background 0.2s, transform 0.1s;
-}
-
-#show-letter-btn:active {
-    background-color: #0056c7;
-    transform: scale(0.97);
-}
-
-#show-letter-btn:focus {
-    outline: 2px solid #0056c7;
-    outline-offset: 2px;
-}
-
+/* 搜尋區塊美化，電腦與手機皆適用 */
 #search-area {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
-    margin: 24px 0 12px 0;
-    padding: 12px 0;
+    gap: 16px;
+    margin: 32px 0 18px 0;
+    padding: 18px 0;
     background: #f5f5f5;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    max-width: 600px;
+    width: 90vw;
+    position: relative;
+    z-index: 2;
 }
-
 .darkmode #search-area {
     background: #23272f;
 }
 
 #search-input {
-    font-size: 1.3em;
-    padding: 10px 16px;
+    font-size: 1.2em;
+    padding: 12px 18px;
     border-radius: 8px;
     border: 1px solid #bbb;
     outline: none;
-    width: 140px;
-    max-width: 40vw;
+    width: 180px;
+    max-width: 50vw;
+    background: #fff;
+    color: #222;
+    transition: border 0.2s;
+}
+.darkmode #search-input {
+    background: #181c22;
+    color: #fff;
+    border: 1px solid #444;
+}
+#search-input:focus {
+    border: 1.5px solid var(--accent-color);
 }
 
 #search-btn {
     font-size: 1.1em;
-    padding: 10px 24px;
+    padding: 12px 28px;
     border-radius: 8px;
     border: none;
     background: var(--accent-color, #0071ff);
     color: #fff;
     cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.2s, transform 0.1s;
+}
+#search-btn:active {
+    background: #0056c7;
+    transform: scale(0.97);
 }
 
+/* 主顯示區塊美化 */
+#display {
+    text-align: center;
+    margin: 40px 0 0 0;
+    padding: 24px 0 12px 0;
+    background: #f9f9fb;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 600px;
+    width: 90vw;
+    position: relative;
+    z-index: 1;
+}
+.darkmode #display {
+    background: #181c22;
+}
+
+/* Letter Pair & Algorithm 顯示區 */
+#letter-pair-text {
+    font-size: 180px;
+    margin: 20px 0 10px 0;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    color: var(--accent-color, #0071ff);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+#Algorithm {
+    font-size: 80px;
+    margin: 10px 0 30px 0;
+    text-align: center;
+    color: #555;
+    word-break: break-word;
+}
+.darkmode #Algorithm {
+    color: #b3b3b3;
+}
+
+/* 深色模式切換按鈕固定右上 */
+#theme-switch {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 10;
+    background: var(--base-variant);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    border: none;
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#theme-switch:active {
+    background: #d0d0d0;
+}
+.darkmode #theme-switch:active {
+    background: #23272f;
+}
+
+/* 手機適配 */
 @media (max-width: 600px) {
-    #show-letter-btn {
-        font-size: 36px;
-        padding: 22px 0;
-        width: 90vw;
-        margin: 40px auto;
-        border-radius: 18px;
-        box-shadow: 0 6px 24px rgba(0,0,0,0.12);
-        display: block;
+    #search-area, #display {
+        max-width: 98vw;
+        width: 98vw;
+        margin-left: 1vw;
+        margin-right: 1vw;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    #search-input {
+        width: 90px;
+        max-width: 40vw;
+        font-size: 1em;
+        padding: 8px 8px;
+    }
+    #search-btn {
+        font-size: 1em;
+        padding: 8px 14px;
     }
     #letter-pair-text {
-        font-size: 80px;
-        margin: 12px;
+        font-size: 60px;
+        margin: 10px 0 6px 0;
     }
     #Algorithm {
-        font-size: 32px;
-        margin: 12px;
-        word-break: break-word;
+        font-size: 22px;
+        margin: 6px 0 18px 0;
+    }
+    #theme-switch {
+        width: 44px;
+        height: 44px;
+        top: 10px;
+        right: 10px;
     }
 }
