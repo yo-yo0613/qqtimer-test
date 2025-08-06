@@ -116,3 +116,22 @@ document.body.addEventListener('touchend', function(event) {
     showRandomLetter();
 });
 
+document.getElementById('search-btn').onclick = function() {
+    const input = document.getElementById('search-input').value.trim().toUpperCase();
+    const idx = letterPair.indexOf(input);
+    const letterText = document.getElementById('letter-pair-text');
+    const algoText = document.getElementById('Algorithm');
+    if (idx !== -1) {
+        letterText.textContent = letterPair[idx];
+        algoText.textContent = algorithm[idx];
+    } else {
+        letterText.textContent = '未找到';
+        algoText.textContent = '';
+    }
+};
+
+// 支援按 Enter 搜尋
+document.getElementById('search-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('search-btn').click();
+});
+

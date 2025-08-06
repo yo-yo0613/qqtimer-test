@@ -114,6 +114,42 @@ body {
     outline-offset: 2px;
 }
 
+#search-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 12px 0;
+    padding: 12px 0;
+    background: #f5f5f5;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.darkmode #search-area {
+    background: #23272f;
+}
+
+#search-input {
+    font-size: 1.3em;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #bbb;
+    outline: none;
+    width: 140px;
+    max-width: 40vw;
+}
+
+#search-btn {
+    font-size: 1.1em;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent-color, #0071ff);
+    color: #fff;
+    cursor: pointer;
+}
+
 @media (max-width: 600px) {
     #show-letter-btn {
         font-size: 36px;
