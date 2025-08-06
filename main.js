@@ -112,7 +112,12 @@ document.getElementById('show-letter-btn').onclick = function() {
     showRandomLetter();
 };
 
-document.body.addEventListener('touchend', function(event) {
+// 只在顯示區點擊或觸控才隨機顯示
+const display = document.getElementById('display');
+display.addEventListener('click', showRandomLetter);
+display.addEventListener('touchend', function(event) {
+    // 避免點擊按鈕時觸發
+    if (event.target.closest('button')) return;
     showRandomLetter();
 });
 
