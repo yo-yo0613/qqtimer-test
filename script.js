@@ -86,8 +86,8 @@ document.getElementById('speed-button').onclick = function() {
     window.location.href = 'index.html';
 };
 
-document.getElementById('cornor-button').onclick = function() {
-    window.location.href = 'cornor.html';
+document.getElementById('speed-button').onclick = function() {
+    window.location.href = 'blindfolded.html';
 };
 
 let darkmode = localStorage.getItem('darkmode');
